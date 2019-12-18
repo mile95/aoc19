@@ -1,44 +1,74 @@
 
 
-def readInput():
-    with open("input.txt") as f:
-        input = f.readline()
-        input = [int(i) for i in input.split(",")]
-        return input
+with open("input.txt") as f:
+    data = f.readline()
+    data = [int(i) for i in data.split(",")]
 
-while (True):
-    ins = readInput()
-    pointer = 0
-    while(True):
-        opCode = ins[pointer]
-        length = len(str(opCode))
-        params = '0'
-        if(length > 2):
-            instruction = str(opCode)[-2:]
-            params = (str(opCode)[:length -2])
+pointer = 0
+while(True):
+    op = data[pointer]
+    modes = '000'
+    length = len(str(op))
+
+    if(length > 1):
+        modes = str(op)[:-2].zfill(3)
+        op = int(str(op)[-2:].replace("0", ""))
+    #halt
+    if(op == 99):
+        break
+
+    #additon or multiplication
+    if(op == 1 or op == 2):
+        arg1 = data[pointer + 1] if int(modes[-1]) == 1 else data[data[pointer + 1]]
+        arg2 = data[pointer + 2] if int(modes[-2]) == 1 else data[data[pointer + 2]]
+        savePos = data[pointer + 3]
+        if(op == 1):
+            data[savePos] = int(arg1) + int(arg2)
+        if(op == 2):
+            data[savePos] = int(arg1) * int(arg2)
+        pointer += 4
+
+    #input
+    if(op == 3):
+        var = input("Enter a digit: ")
+        savePos = data[pointer + 1]
+        data[savePos] = var
+        pointer += 2
+
+    #ouput
+    if(op == 4):
+        var = data[pointer + 1] if int(modes[-1]) == 1 else data[data[pointer + 1]]
+        print(str(var))
+        pointer += 2
+
+    #jump-if-true
+    if(op == 5):
+        arg1 = data[pointer + 1] if int(modes[-1]) == 1 else data[data[pointer + 1]]
+        arg2 = data[pointer + 2] if int(modes[-2]) == 1 else data[data[pointer + 2]]
+        if(int(arg1) != 0):
+            pointer = arg2
         else:
-            instruction = opCode
-        if(int(instruction) == 99):
-            exit()
-            break
-        if(int(instruction) == 1):
-            arg1 = ins[pointer + 1] if int(params[:1]) == 1 else ins[ins[pointer + 1]]
-            arg2 = ins[pointer + 2] if int(params[:2]) == 1 else ins[ins[pointer + 2]]
-            savePos = ins[pointer + 3]
-            ins[savePos] = arg1 + arg2
-            pointer += 4
-        if(int(instruction) == 2):
-            arg1 = ins[pointer + 1] if int(params[:1]) == 1 else ins[ins[pointer + 1]]
-            arg2 = ins[pointer + 2] if int(params[:2]) == 1 else ins[ins[pointer + 2]]
-            savePos = ins[pointer + 3]
-            ins[savePos] = arg1 * arg2
-            pointer += 4
-        if(int(instruction) == 3):
-            var = input("Enter a digit:")
-            savePos = ins[pointer + 1]
-            ins[savePos] = var
-            pointer += 2
-        if(int(instruction) == 4):
-            var = ins[ins[pointer+1]]
-            print(var)
-            pointer += 2
+            pointer += 3
+
+    #jump-if-false
+    if(op == 6):
+        arg1 = data[pointer + 1] if int(modes[-1]) == 1 else data[data[pointer + 1]]
+        arg2 = data[pointer + 2] if int(modes[-2]) == 1 else data[data[pointer + 2]]
+        if(int(arg1) == 0):
+            pointer = arg2
+        else:
+            pointer += 3
+
+    #less than
+    if(op == 7):
+        arg1 = data[pointer + 1] if int(modes[-1]) == 1 else data[data[pointer + 1]]
+        arg2 = data[pointer + 2] if int(modes[-2]) == 1 else data[data[pointer + 2]]
+        data[data[pointer + 3]] = 1 if int(arg1) < int(arg2) else 0
+        pointer += 4
+
+    #equal
+    if(op == 8):
+        arg1 = data[pointer + 1] if int(modes[-1]) == 1 else data[data[pointer + 1]]
+        arg2 = data[pointer + 2] if int(modes[-2]) == 1 else data[data[pointer + 2]]
+        data[data[pointer + 3]] = 1 if int(arg1) == int(arg2) else 0
+        pointer += 4
