@@ -1,0 +1,6 @@
+
+#input file
+input.txt
+
+# All class files
+*.class
